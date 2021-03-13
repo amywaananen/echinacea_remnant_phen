@@ -1,0 +1,12 @@
+---
+title: "Markdown for phen project"
+author: "Qingyuan Liu"
+date: "2021/3/14"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+
