@@ -9,4 +9,37 @@ output: html_document
 knitr::opts_chunk$set(echo = TRUE)
 ```
 
+This project aims to compare the flower duration of populations of Echinacea by sites in Western Minnesota.
 
+```{r pacakages}
+install.packages("dplyr")
+library(dplyr)
+install.packages("tidyr")
+library(tidyr)
+```
+
+The raw data consists of two datasets: headIDtoAKA20190612.csv (explore) 
+and remPhenologyThru2019_20200909.csv (explore2)
+
+```{r}
+head(explore)
+head(explore2)
+```
+
+These two files contain the information of Echinacea populations, including their flower time. but We need to merge the two files into 1 file for further exploration.
+
+```{r tidy}
+alldata <- merge(explore, explore2, by = "headID")
+select(alldata, headID, site, year.y, startDtEarly,startDtLate, endDtEarly, endDtLate)
+tidy <- (select(alldata, headID, site, year.y, startDtEarly,startDtLate, endDtEarly, endDtLate))
+summary(tidy)
+```
+
+Since the flower duration need to be calculated from the start and end date, the date columns need to be separated into year, monnth and date.
+
+```{r}
+separated <- tidy %>%
+  separate(startDtLate, into = c("yearz", "month", "day"), sep = "-") %>%
+  separate(endDtEarly, into = c("yearz2", "month2", "day2"), sep = "-")
+head(separated)
+```
