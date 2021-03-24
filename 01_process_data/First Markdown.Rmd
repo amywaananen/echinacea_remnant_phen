@@ -1,5 +1,5 @@
 ---
-title: "Markdown for phen project"
+title: "Phen Flowering Time"
 author: "Qingyuan Liu"
 date: "2021/3/14"
 output: html_document
@@ -11,10 +11,9 @@ knitr::opts_chunk$set(echo = TRUE)
 
 This project aims to compare the flower duration of populations of Echinacea by sites in Western Minnesota.
 
-```{r pacakages}
-install.packages("dplyr")
+```{r pacakages, message=FALSE, warning=FALSE}
+library(here)
 library(dplyr)
-install.packages("tidyr")
 library(tidyr)
 ```
 
@@ -22,15 +21,17 @@ The raw data consists of two datasets: headIDtoAKA20190612.csv (explore)
 and remPhenologyThru2019_20200909.csv (explore2)
 
 ```{r}
+explore <- read.csv(here('00_raw_data/headIdToAKA20190612.csv'))
+explore2 <- read.csv(here('00_raw_data/remPhenologyThru2019_20200909.csv'))
 head(explore)
 head(explore2)
 ```
 
 These two files contain the information of Echinacea populations, including their flower time. but We need to merge the two files into 1 file for further exploration.
 
-```{r tidy}
+```{r tidy, echo=TRUE, message=FALSE, warning=FALSE, paged.print=TRUE}
 alldata <- merge(explore, explore2, by = "headID")
-select(alldata, headID, site, year.y, startDtEarly,startDtLate, endDtEarly, endDtLate)
+summary(alldata)
 tidy <- (select(alldata, headID, site, year.y, startDtEarly,startDtLate, endDtEarly, endDtLate))
 summary(tidy)
 ```
@@ -38,8 +39,42 @@ summary(tidy)
 Since the flower duration need to be calculated from the start and end date, the date columns need to be separated into year, monnth and date.
 
 ```{r}
-separated <- tidy %>%
-  separate(startDtLate, into = c("yearz", "month", "day"), sep = "-") %>%
-  separate(endDtEarly, into = c("yearz2", "month2", "day2"), sep = "-")
-head(separated)
+Duration <- tidy %>% 
+  mutate(duration = as.Date(endDtEarly) - as.Date(startDtEarly))
+summary(Duration)
+```
+
+Now dataset Duration is ready to be analyzed since it contains all the information needed, including the duration of flower time. 
+But there are some columns containing "N/A", and some unavailable date that makes the result invalid.
+We can clear all such columns first.
+```{r}
+nrow(Duration)
+Dur_tidy <- Duration%>% 
+  filter(duration > -1)%>%
+  filter(duration < 50)%>%
+  filter(site != "Other")%>%
+  drop_na()
+nrow(Dur_tidy)
+```
+
+All the sites contained in the raw data is shown below:
+
+```{r}
+unique(Dur_tidy$site)
+```
+
+Summarize the average flower duration according to sites:
+
+```{r paged.print=TRUE}
+Sum <- Dur_tidy%>%
+  group_by(site)%>%
+  summarise(avg_dur = mean(duration))
+head(Sum)
+```
+
+Now we can start performing an One-way ANOVA test to see if the site has any impact on the flower time.
+(Or if the flower time diverges in different sites.)
+
+```{r}
+
 ```

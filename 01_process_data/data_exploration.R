@@ -25,9 +25,6 @@ es_withextra <- merge(explore, explore2, by = "headID", all = TRUE)
 nrow(es_withextra) ###10406###
 
 
-###subset individuals according to their sites###
-unique(explore_sum$site)
-
 ###Check start and end date###
 bad <- filter(explore_sum, startDtEarly != startDtLate)
 nrow(bad)
@@ -65,7 +62,8 @@ dur <- sep %>%
   mutate(duration = (month2-month)*30 + (day2-day))
 
 ###Summarize the duration by sites###
+
+unique(Sum$site)
 Sum <- dur%>%
   group_by(site)%>%
   summarise(avg_duration = mean(duration))
-
