@@ -21,49 +21,59 @@ nrow(explore2) ###9796###
 explore_sum <- merge(explore, explore2, by = "headID")
 nrow(explore_sum) ###9683###
 
-es_withextra <- merge(explore, explore2, by = "headID", all = TRUE)
-nrow(es_withextra) ###10406###
-
-
-###Check start and end date###
-bad <- filter(explore_sum, startDtEarly != startDtLate)
-nrow(bad)
-bad2 <- filter(explore_sum, endDtEarly != endDtLate)
-nrow(bad2)
-head(bad2)
 
 ###Calculate the duration of flower time using late start time and early end time###
+
 
 ###select relevant columns only###
 select(explore_sum, headID, site, year.y, startDtEarly,startDtLate, endDtEarly, endDtLate)
 tidy <- (select(explore_sum, headID, site, year.y, startDtEarly,startDtLate, endDtEarly, endDtLate))
 
-###separate the date columns for easier calculation###
-separated <- tidy %>%
-  separate(startDtLate, into = c("yearz", "month", "day"), sep = "-") %>%
-  separate(endDtEarly, into = c("yearz2", "month2", "day2"), sep = "-")
 
-###Check if there is errors in the years column###
-separated %>%
-  filter(yearz != yearz2)
+###Use both early date###
 
-###change the separated columns to numeric from character###
-sapply(separated, mode)
-sapply(separated, class)
-
-sep <- separated %>% 
-  transform(month = as.numeric(month)) %>% 
-  transform(day = as.numeric(day)) %>% 
-  transform(month2 = as.numeric(month2))%>% 
-  transform(day2 = as.numeric(day2))
-
-###Calculate the duration###           
-dur <- sep %>% 
-  mutate(duration = (month2-month)*30 + (day2-day))
+Duration <- tidy %>% 
+  mutate(duration = as.Date(endDtEarly) - as.Date(startDtEarly))
+View(Duration)
 
 ###Summarize the duration by sites###
 
-unique(Sum$site)
-Sum <- dur%>%
+unique(Duration$site)
+
+Sum <- Duration%>%
   group_by(site)%>%
-  summarise(avg_duration = mean(duration))
+  summarise(avg_dur = mean(duration))
+View(Sum)
+
+
+
+
+###Try clear NA columns###
+
+?na.omit
+View(Duration)
+nrow(Duration)
+NoNA <- Duration%>% 
+  drop_na(site, startDtEarly,endDtEarly)%>%
+  drop_na()
+nrow(NoNA)
+unique(NoNA$site)
+unique(Duration$site)
+
+Sum2 <- NoNA%>%
+  group_by(site)%>%
+  summarise(avg_dur = mean(duration))
+View(Sum2)
+
+
+valid <- NoNA%>%
+  filter(duration > -1)%>%
+  filter(duration < 50)
+nrow(valid)
+
+date <- c(as.Date("2021-03-16"), as.Date("2021-02-03"))
+mean(date)
+
+###take average of early and late date or take one of the time window###
+###install.packages('here')
+explore <- read.csv(here('00_raw_data/headIdToAKA20190612.csv'))###

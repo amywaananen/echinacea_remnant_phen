@@ -15,6 +15,7 @@ This project aims to compare the flower duration of populations of Echinacea by 
 library(here)
 library(dplyr)
 library(tidyr)
+library(tidyverse)
 ```
 
 The raw data consists of two datasets: headIDtoAKA20190612.csv (explore) 
@@ -46,13 +47,18 @@ summary(Duration)
 
 Now dataset Duration is ready to be analyzed since it contains all the information needed, including the duration of flower time. 
 But there are some columns containing "N/A", and some unavailable date that makes the result invalid.
-We can clear all such columns first.
+In addition, there are some sites taht only contain 1 data, which makes the ANOVA analysis not significant.
+We can clear all such rows first.
 ```{r}
 nrow(Duration)
 Dur_tidy <- Duration%>% 
   filter(duration > -1)%>%
   filter(duration < 50)%>%
   filter(site != "Other")%>%
+  filter(site != "sign")%>%
+  filter(site != "KJs")%>%
+  filter(site != "tp")%>%
+  filter(site != "yard")%>%
   drop_na()
 nrow(Dur_tidy)
 ```
@@ -68,13 +74,28 @@ Summarize the average flower duration according to sites:
 ```{r paged.print=TRUE}
 Sum <- Dur_tidy%>%
   group_by(site)%>%
-  summarise(avg_dur = mean(duration))
+  summarise(avg_dur = mean(duration),sd_duration = sd(duration))
 head(Sum)
+Dur_tidy%>%
+  group_by(site)%>%
+  summarise(avg_dur = mean(duration),sd_duration = sd(duration))
 ```
 
 Now we can start performing an One-way ANOVA test to see if the site has any impact on the flower time.
 (Or if the flower time diverges in different sites.)
 
 ```{r}
-
+one.way <- aov(duration ~ site, data = Dur_tidy)
+summary(one.way)
 ```
+
+The result shows that variance does exist for the duration of flower in different sites, and the difference is statistically significant.
+
+The graph shows how the mean and standard deviation of each site group compare.
+
+```{r}
+ggplot(data = Dur_tidy)+
+  geom_boxplot(mapping = aes(x = site, y = duration))+
+  coord_flip()
+```
+
