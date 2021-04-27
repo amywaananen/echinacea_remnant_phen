@@ -75,7 +75,7 @@ Summarize the average flower duration according to sites:
 Sum <- Dur_tidy%>%
   group_by(site)%>%
   summarise(avg_dur = mean(duration),sd_duration = sd(duration))
-head(Sum)
+
 Dur_tidy%>%
   group_by(site)%>%
   summarise(avg_dur = mean(duration),sd_duration = sd(duration))
@@ -99,3 +99,20 @@ ggplot(data = Dur_tidy)+
   coord_flip()
 ```
 
+ANOVA test can also be done on the start and end date of the flower time
+```{r}
+one.way2 <- aov(as.Date(startDtLate) ~ site, data = Dur_tidy)
+summary(one.way2)
+one.way3 <- aov(as.Date(endDtEarly) ~ site, data = Dur_tidy)
+summary(one.way3)
+```
+
+```{r}
+ggplot(data = Dur_tidy)+
+  geom_boxplot(mapping = aes(x = site, y = as.Date(startDtLate)))+
+  coord_flip()
+
+ggplot(data = Dur_tidy)+
+  geom_boxplot(mapping = aes(x = site, y = as.Date(endDtEarly)))+
+  coord_flip()
+```

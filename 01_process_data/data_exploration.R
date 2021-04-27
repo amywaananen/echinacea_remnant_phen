@@ -60,11 +60,22 @@ nrow(NoNA)
 unique(NoNA$site)
 unique(Duration$site)
 
+
+###Below are experimental codes, just trying the functions###
+###Line###
+###Line###
+###Line###
+###Line###
+###-----------------------------------------------------------------------------------------------------###
+
 Sum2 <- NoNA%>%
   group_by(site)%>%
   summarise(avg_dur = mean(duration))
 View(Sum2)
 
+Sumsd <- Dur_tidy%>%
+  group_by(site)%>%
+  summarise(avg_dur = mean(duration), sd_duration = sd(duration))
 
 valid <- NoNA%>%
   filter(duration > -1)%>%
@@ -77,3 +88,30 @@ mean(date)
 ###take average of early and late date or take one of the time window###
 ###install.packages('here')
 explore <- read.csv(here('00_raw_data/headIdToAKA20190612.csv'))###
+
+Sum <- Dur_tidy%>%
+  group_by(site)%>%
+  summarise(avg_dur = mean(duration))
+
+?grep('01-01', data$startDtEarly)
+
+###One-way ANOVA###
+one.way <- aov(duration ~ site, data = Dur_tidy)
+summary(one.way)
+
+###
+mode(Dur_tidy$site)
+Dur_tidy <- Dur_tidy%>%
+  subset(site != "KJs")%>%
+  subset(site != "sign")%>%
+  subset(site != "tp")%>%
+  subset(site != "yerd")
+View(Dur_tidy)
+
+Dur_tidy <- Dur_tidy%>%
+  subset(site != "sign")%>%
+  subset(site != "Kjs")%>%
+  subset(site != "tp")%>%
+  subset(site != "yard")
+nrow(deleted)
+nrow(Dur_tidy)
